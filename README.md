@@ -7,9 +7,9 @@
 
 ## Файлы
 - `index.html` — всё приложение (один файл)
-- `manifest.webmanifest`, `sw.js`, `icons/` — установка как приложения и работа без сети для самой программы
-- `404.html`, `_redirects`, `.gitignore` — служебные
-- `supabase/README.md` — устройство базы данных
+- `manifest.webmanifest`, `sw.js`, `icon-*.png`, `apple-touch-icon.png`, `logo.svg` — установка как приложения и иконки
+- `404.html` — служебная страница
+- `SUPABASE.md` — устройство базы данных
 
 ## Публикация: GitHub → Netlify (автообновление)
 1. Создайте на github.com пустой репозиторий `esa-control`.
