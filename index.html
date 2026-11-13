@@ -88,7 +88,7 @@ const iso=o=>{const d=new Date();d.setDate(d.getDate()+o);return d.getFullYear()
 const fmt=s=>{s=Math.floor(s);return[Math.floor(s/3600),Math.floor(s/60)%60,s%60].map(x=>String(x).padStart(2,'0')).join(':')};
 const money=n=>n.toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
 const WORK=[['Обработка банковских выписок','Ежемесячно'],['Расчёт и выплата зарплаты','Ежемесячно'],['Сбор и архив первичных документов','Ежемесячно'],['Итоговая ОСВ за месяц','Ежемесячно'],['Единый налог: отчёт','Ежеквартально'],['Форма 161: соцфонд и ГНПФ','Ежеквартально'],['Статотчёт ФХД микро','Ежеквартально']];
-const CHK=['Доход в отчёте ЕН = полученные деньги','Доход в отчёте ЕН = выручка в учёте','Единый налог в отчёте = начислен в учёте','Зарплата в Форме 161 = начислена в учёте','Подоходный налог в Форме 161 = в учёте','Соцвзносы в Форме 161 = в учёте','Взносы ГНПФ в Форме 161 = в учёте','Остаток на р/с в ОСВ = остаток по выписке банка','НДС в декларации = НДС в учёте','Остаток кассы в ОСВ = по кассовой книге'];
+const CHK=['Доход в отчёте ЕН = полученные деньги','Доход в отчёте ЕН = выручка в учёте','Единый налог в отчёте = начислен в учёте','Зарплата в Форме 161 = начислена в учёте','Подоходный налог в Форме 161 = в учёте','Соцвзносы в Форме 161 = в учёте','Взносы ГНПФ в Форме 161 = в учёте','Остаток на р/с в ОСВ = остаток по выписке банка','НДС в декларации = НДС в учёте','Остаток кассы в ОСВ = по кассовой книге','Налог с продаж в отчёте = начислен в учёте','Облагаемые поставки в НДС = выручка в учёте','ОСВ: обороты дебета и кредита равны','НДС в реестре приобретений = 12% от стоимости'];
 const ROLES={admin:'Администратор',head:'Руководитель',chief:'Главбух',acc:'Бухгалтер'};
 const NAV=[['dash','Руководитель','▦','admin head chief'],['cl','Клиенты','☷','admin head chief'],['sm','БухСмета','≡','admin head chief'],['me','Мой кабинет','⌂','emp'],['tk','БухЗадачник','✓','admin head chief acc emp'],['ck','Чеклист','✔','admin head chief acc emp'],['mc','Мои клиенты','☷','emp'],['st','Сотрудники','☺','admin head chief'],['au','Автоаудит','◎','admin head chief'],['lg','Журнал','☰','admin head chief'],['rp','Отчёты клиентам','✉','admin head chief'],['set','Настройки','⚙','admin'],['rm','Развитие','➚','admin head chief acc'],['usr','Доступы клиентов ESA','♛','su']];
 const TITLE={dash:'Руководитель: вся картина',cl:'Клиентская база',tk:'БухЗадачник',st:'Команда',au:'Автоаудит',rp:'Отчёты клиентам в Telegram',set:'Настройки',ck:'Чеклист на ближайшие дни',lg:'Журнал действий',me:'Мой кабинет',mc:'Мои клиенты',sm:'БухСмета: сметы и рентабельность',rm:'Развитие и ценность',usr:'Доступы: логины и пароли клиентов'};
@@ -168,7 +168,7 @@ function clAdd(){const n=$('#f_n').value.trim(),i=$('#f_i').value.trim();const t
 function tgl(id){const c=S.clients.find(x=>x.id==id);c.act=c.act?0:1;go()}
 function del(id){ask('Удалить клиента и его задачи?',()=>{S.clients=S.clients.filter(c=>c.id!=id);S.tasks=S.tasks.filter(t=>t.cl!=id);go()})}
 function runA(){toast('Сверка запущена…');setTimeout(()=>{if(!S)return;runAudit(S);toast('Сверка завершена за 1 секунду');go()},900)}
-function rv(i,r){const a=S.au[i];a.r=r;if(r=='rej'){const q=S.tasks.find(t=>t.cl==a.cl&&S.emps.some(e=>e.id==t.emp&&e.r=='acc')),ac=S.emps.filter(e=>e.r=='acc');S.tasks.push({id:nid(S),cl:a.cl,t:'Вопрос аудита №'+(a.k+1)+': объясните расхождение'+(a.x?' ('+a.x+')':''),per:'Разово',emp:q?q.emp:(ac[0]||S.emps[0]||{}).id,due:iso(2),st:'new',sp:0,run:0,h:1,au:i,by:'руководитель',cr:TD()})}toast(r=='acc'?'Расхождение принято':'Вопрос отправлен бухгалтеру в задачник');go()}
+function rv(i,r){const a=S.au[i];a.r=r;if(r=='rej'){const q=S.tasks.find(t=>t.cl==a.cl&&S.emps.some(e=>e.id==t.emp&&e.r=='acc')),ac=S.emps.filter(e=>e.r=='acc');S.tasks.push({id:nid(S),cl:a.cl,t:'Вопрос аудита №'+(a.k+1)+': объясните расхождение'+((a.x||a.nt)?' ('+(a.x||a.nt)+')':''),per:'Разово',emp:q?q.emp:(ac[0]||S.emps[0]||{}).id,due:iso(2),st:'new',sp:0,run:0,h:1,au:i,by:'руководитель',cr:TD()})}toast(r=='acc'?'Расхождение принято':'Вопрос отправлен бухгалтеру в задачник');go()}
 function addRef(k){const v=$('#i_'+k).value.trim();if(v){S.ref[k].push(v);go()}}
 function exp(){const a=document.createElement('a');a.href='data:application/json;charset=utf-8,'+encodeURIComponent(JSON.stringify(S,null,1));a.download='esa-control.json';a.click()}
 setInterval(()=>{if(!S)return;document.querySelectorAll('[data-t]').forEach(e=>{const t=S.tasks.find(x=>x.id==e.dataset.t);if(t)e.textContent=fmt(spent(t))})},1000);
@@ -396,12 +396,61 @@ function chSave(){const v=($('#ch_n').value||'').trim().slice(0,120);if(!v){toas
 function chReset(){if(CE!=null&&CE<CHK.length){S.chn[CE]=CHK[CE];mx();toast('Возвращено исходное название');save();go()}}
 function auDel(i){const a=(S.au||[])[i];if(!a)return;a.del=1;toast('Сверка убрана');save();go()}
 function auClear(){(S.au||[]).forEach(a=>{a.del=1});toast('Список сверок очищен');save();go()}
-V.au=()=>{const A=(S.au||[]).filter(a=>!a.del),own=S.role=='admin',bad=A.filter(a=>a.r=='bad').length,rvd=A.filter(a=>a.r=='acc').length;
+V.au=()=>{auKick();const A=(S.au||[]).filter(a=>!a.del),own=S.role=='admin',bad=A.filter(a=>a.r=='bad').length,rvd=A.filter(a=>a.r=='acc').length;
 const cell=a=>{const i=S.au.indexOf(a);return a.r=='ok'?'<span class="tg ok">Совпало</span>':a.r=='bad'?`<span class="tg er">Не совпало</span> ${own?`<button class="b s g" onclick="rv(${i},'acc')">Принять</button> <button class="b s r" onclick="rv(${i},'rej')">Вернуть</button>`:''}`:a.r=='acc'?'<span class="tg ok">Принято</span>':a.r=='ans'?`<span class='tg'>Ответ: ${E(a.cm||'')}</span> ${own?`<button class="b s g" onclick="rv(${i},'acc')">Принять</button> <button class="b s r" onclick="rv(${i},'rej')">Вернуть</button>`:''}`:'<span class="tg wa">Ждём ответ бухгалтера</span>'};
 const L=A.filter(a=>a.r!='ok').concat(A.filter(a=>a.r=='ok'));
-return `<div class=c style='margin-bottom:14px'><div class=row><div><b style='font-size:18px'>Автоаудит: сверка документов</b><br><span style='color:var(--mu)'>Откуда суммы: «По ОСВ» берётся из оборотно-сальдовой ведомости учёта, «По отчёту» из сданного отчёта клиента (ЕН, Форма 161, НДС). Их вносит руководитель, система сама считает разницу и итог. Включено проверок: ${S.chk.filter(Boolean).length} из ${CH().length}. Нажмите на проверку или на сумму в таблице, чтобы изменить.</span></div>${own?`<div style='margin-left:auto;display:flex;gap:6px;flex-wrap:wrap'><button class='b p' onclick='auForm()'>＋ Добавить сверку</button><button class='b' onclick='runA()'>↻ Пересчитать</button>${A.length?`<button class='b r' onclick="ask('Убрать все сверки из списка?',auClear)">Очистить</button>`:''}</div>`:''}</div><div class=row><span class='tg ok'>совпало ${A.filter(a=>a.r=='ok').length}</span><span class='tg er'>расхождений ${bad}</span><span class=tg>принято ${rvd}</span></div>
+return `<div class=c style='margin-bottom:14px'><div class=row><div><b style='font-size:18px'>Автоаудит: сверка документов</b><br><span style='color:var(--mu)'>Откуда суммы: «По ОСВ» берётся из оборотно-сальдовой ведомости учёта, «По отчёту» из сданного отчёта клиента (ЕН, Форма 161, НДС). Суммы «по отчёту» система сама читает из принятых Excel-отчётов (НДС, НсП, Форма 161, ОСВ) и сверяет с учётом; остальное вносит руководитель. Разницу и итог считает система. Включено проверок: ${S.chk.filter(Boolean).length} из ${CH().length}. Нажмите на проверку или на сумму в таблице, чтобы изменить.</span></div>${own?`<div style='margin-left:auto;display:flex;gap:6px;flex-wrap:wrap'><button class='b p' onclick='auForm()'>＋ Добавить сверку</button><button class='b' onclick='runA()'>↻ Пересчитать</button><button class='b p' onclick='auAuto()'>⚙ Сверить по отчётам</button>${A.length?`<button class='b r' onclick="ask('Убрать все сверки из списка?',auClear)">Очистить</button>`:''}</div>`:''}</div><div class=row><span class='tg ok'>совпало ${A.filter(a=>a.r=='ok').length}</span><span class='tg er'>расхождений ${bad}</span><span class=tg>принято ${rvd}</span></div>${auBan()}
 ${CH().map((c,k)=>`<label class=chip><input type=checkbox ${S.chk[k]?'checked':''} ${own?'':'disabled'} onchange="S.chk[${k}]=this.checked;save()"> <span ${own?`onclick='event.preventDefault();chEdit(${k})' title='Нажмите, чтобы изменить' style='cursor:pointer;border-bottom:1px dashed var(--mu)'`:''}>№${k+1} ${E(c)}</span></label>`).join('')}${own?`<button class='chip' style='cursor:pointer' onclick='chEdit(null)'>＋ проверка</button>`:''}</div>
-<div class='c tw'>${L.length?`<table><tr><th>Клиент</th><th>Период</th><th>Проверка</th><th>По ОСВ</th><th>По отчёту</th><th>Разница</th><th>Внёс</th><th>Итог</th><th></th></tr>${L.map(a=>{const i=S.au.indexOf(a),ex=S.clients.some(c=>c.id==a.cl);return `<tr><td>${ex?E(cn(a.cl)):'<span style="color:var(--mu)">клиент удалён</span>'}</td><td>${E(a.m||'—')}</td><td title='${E(CH()[a.k]||'')}'>№${a.k+1}</td><td class=tm ${own?`onclick='auForm(${i})' style='cursor:pointer;text-decoration:underline dotted' title='Нажмите, чтобы изменить'`:''}>${money(+a.a||0)}</td><td class=tm ${own?`onclick='auForm(${i})' style='cursor:pointer;text-decoration:underline dotted' title='Нажмите, чтобы изменить'`:''}>${a.x?E(a.x):money(+a.b||0)}</td><td class=tm style='color:${Math.abs((+a.a||0)-(+a.b||0))<0.005?'var(--ok)':'var(--er)'}'>${a.x?'—':money((+a.a||0)-(+a.b||0))}</td><td style='font-size:12px;color:var(--mu)'>${E(a.by||'пример')}${a.d?'<br>'+dDt(a.d):''}</td><td>${cell(a)}</td><td>${own?`<button class='b s' onclick='auDel(${i})' aria-label='Убрать'>✕</button>`:''}</td></tr>`}).join('')}</table>`:`<div style='padding:16px;color:var(--mu)'>${own?'Сверок пока нет. Нажмите «＋ Добавить сверку»: выберите клиента и проверку, введите сумму из ОСВ и сумму из отчёта.':'Сверки ведёт руководитель. Если по вашему клиенту найдут расхождение, вопрос придёт вам в БухЗадачник.'}</div>`}</div>`};
+<div class='c tw'>${L.length?`<table><tr><th>Клиент</th><th>Период</th><th>Проверка</th><th>По ОСВ</th><th>По отчёту</th><th>Разница</th><th>Внёс</th><th>Итог</th><th></th></tr>${L.map(a=>{const i=S.au.indexOf(a),ex=S.clients.some(c=>c.id==a.cl);return `<tr><td>${ex?E(cn(a.cl)):'<span style="color:var(--mu)">клиент удалён</span>'}</td><td>${E(a.m||'—')}</td><td title='${E(CH()[a.k]||'')}'>№${a.k+1}</td><td class=tm ${own?`onclick='auForm(${i})' style='cursor:pointer;text-decoration:underline dotted' title='Нажмите, чтобы изменить'`:''}>${money(+a.a||0)}</td><td class=tm ${own?`onclick='auForm(${i})' style='cursor:pointer;text-decoration:underline dotted' title='Нажмите, чтобы изменить'`:''}>${a.x?E(a.x):money(+a.b||0)}</td><td class=tm style='color:${Math.abs((+a.a||0)-(+a.b||0))<0.005?'var(--ok)':'var(--er)'}'>${a.x?'—':money((+a.a||0)-(+a.b||0))}</td><td style='font-size:12px;color:var(--mu)'>${E(a.by||'пример')}${a.d?'<br>'+dDt(a.d):''}${a.nt?'<br>'+E(a.nt):''}</td><td>${cell(a)}</td><td>${own?`<button class='b s' onclick='auDel(${i})' aria-label='Убрать'>✕</button>`:''}</td></tr>`}).join('')}</table>`:`<div style='padding:16px;color:var(--mu)'>${own?'Сверок пока нет. Нажмите «＋ Добавить сверку»: выберите клиента и проверку, введите сумму из ОСВ и сумму из отчёта.':'Сверки ведёт руководитель. Если по вашему клиенту найдут расхождение, вопрос придёт вам в БухЗадачник.'}</div>`}</div>`};
+
+
+/* ===== Автоаудит по реальным отчётам (читает принятые Excel-файлы на сервере) ===== */
+const AUC={},AUR={ran:0,busy:0,w:[],pend:[],n:0,bad:0};
+const auR2=x=>Math.round(x*100)/100,auN=x=>auR2(x).toLocaleString('ru-RU',{minimumFractionDigits:2,maximumFractionDigits:2});
+const xlsDoc=d=>/\.xlsx?$/i.test(d.n||'');
+async function dParse(id){if(id in AUC)return AUC[id];const r=await fetch(DOCU()+'?a=parse&id='+id,{headers:{'x-esa-token':SYNC.tok,apikey:SB_KEY}});let j=null;try{j=await r.json()}catch(e){}if(!r.ok||!j||!j.ok)throw new Error(j&&j.error||'server');return AUC[id]=j.report||null}
+const nmKey=s=>String(s||'').toLowerCase().replace(/общество с ограниченной ответственностью|осоо|ип(?=\s)/g,'').replace(/[^a-zа-яё0-9]/g,'');
+function auKick(){if(S&&S.role=='admin'&&!AUR.ran&&ONL&&SYNC&&SYNC.tok){AUR.ran=1;setTimeout(()=>auAuto(true),250)}}
+function auBan(){let h='';if(AUR.busy)h+="<div style='margin-top:8px;color:var(--mu)'>Читаю принятые отчёты…</div>";AUR.w.forEach(w=>{h+=`<div class='tg er' style='display:block;margin-top:6px;white-space:normal'>${E(w)}</div>`});if(AUR.pend.length)h+=`<div style='margin-top:8px;font-size:13px;color:var(--mu)'>Ждут приёмки и пока не учитываются: ${AUR.pend.map(t=>E(cn(t.cl)+' · '+t.t)).join('; ')}</div>`;return h}
+async function auAuto(quiet){
+if(!S||S.role!='admin')return;
+if(!ONL||!SYNC||!SYNC.tok){if(!quiet)toast('Сверка по отчётам работает при подключённой онлайн-базе');return}
+if(AUR.busy)return;AUR.busy=1;AUR.w=[];AUR.pend=[];
+try{
+const G={};
+for(const t of S.tasks){
+const ds=(S.docs||[]).filter(d=>d.tid==t.id&&d.k!='fix'&&xlsDoc(d)).sort((a,b)=>a.id-b.id);
+if(!ds.length)continue;
+if(t.st=='rev'){AUR.pend.push(t);continue}
+if(t.st!='done')continue;
+const c=S.clients.find(x=>x.id==t.cl);if(!c)continue;
+for(const d of ds){
+let rp;try{rp=await dParse(d.id)}catch(e){continue}
+if(!rp)continue;
+if(rp.form=='osv'){const a=nmKey(rp.org),b=nmKey(c.n);if(!a||!b||(a.indexOf(b)<0&&b.indexOf(a)<0)){AUR.w.push('Файл «'+d.n+'» — ОСВ другой организации ('+rp.org+'), к клиенту «'+c.n+'» не отнесён.');continue}}
+else if(c.inn&&rp.inn&&rp.inn!==c.inn){AUR.w.push('Файл «'+d.n+'» подан на ИНН '+rp.inn+', а у клиента «'+c.n+'» ИНН '+c.inn+'. В сверку не взят.');continue}
+const m=rp.from?rp.from.slice(0,7):'';if(!m)continue;
+((G[c.id]=G[c.id]||{})[m]=G[c.id][m]||{})[rp.form]={rp,id:d.id}}}
+const E2=[];
+for(const cid of Object.keys(G))for(const m of Object.keys(G[cid])){
+const g=G[cid][m],O=g.osv&&g.osv.rp.acct,kr=a=>O&&O[a]?O[a][3]:0;
+const put=(k,a,b,nt,ids)=>E2.push({cl:+cid,k,m,a:auR2(a),b:auR2(b),nt,docs:ids});
+const f=g.f161&&g.f161.rp.v,ns=g.nsp&&g.nsp.rp.v,nd=g.nds&&g.nds.rp;
+if(O&&f){put(3,kr('3520'),f.income,'ОСВ сч.3520 (Кт) и Ф.161 стр.204',[g.osv.id,g.f161.id]);put(4,kr('3420'),f.pit,'ОСВ сч.3420 (Кт) и Ф.161 стр.210',[g.osv.id,g.f161.id]);put(5,kr('3531')+kr('3532')+kr('3533'),f.contrib,'ОСВ сч.3531–3533 (Кт) и Ф.161 стр.213',[g.osv.id,g.f161.id]);put(6,kr('3534'),f.npf,'ОСВ сч.3534 (Кт) и Ф.161 стр.214',[g.osv.id,g.f161.id])}
+if(O&&ns)put(10,kr('3480'),ns.tax,'ОСВ сч.3480 (Кт) и НсП: налог',[g.osv.id,g.nsp.id]);
+if(O&&nd&&nd.v){put(8,kr('3430'),nd.v.l059||0,'ОСВ сч.3430 (Кт) и НДС стр.059',[g.osv.id,g.nds.id]);put(11,kr('6110'),nd.v.l050||0,'ОСВ сч.6110 (Кт) и НДС стр.050',[g.osv.id,g.nds.id])}
+if(g.osv&&g.osv.rp.tot)put(12,g.osv.rp.tot[2],g.osv.rp.tot[3],'ОСВ: итого обороты Дт и Кт',[g.osv.id]);
+if(nd&&nd.v&&nd.v.reg2){const an=nd.anom||[],dif=an.reduce((s,x)=>s+(x.vat-x.calc),0);put(13,nd.v.reg2.vat,nd.v.reg2.vat-dif,an.length?an.map(x=>'Счёт '+x.inv+' '+x.sup+' от '+x.date+': НДС '+auN(x.vat)+' вместо '+auN(x.calc)).join('; '):'Все счета: НДС = 12%',[g.nds.id])}}
+S.au=S.au||[];const key=x=>x.cl+'|'+x.k+'|'+x.m,keep=new Set();let ch=0;
+for(const e of E2){keep.add(key(e));const r=Math.abs(e.a-e.b)<0.005?'ok':'bad',ex=S.au.find(x=>x.src=='auto'&&!x.del&&key(x)==key(e));
+if(ex){if(Math.abs(ex.a-e.a)>=0.005||Math.abs(ex.b-e.b)>=0.005){ex.a=e.a;ex.b=e.b;ex.r=r;delete ex.cm;ex.d=Date.now();ch++}else if((ex.r=='ok'||ex.r=='bad')&&ex.r!=r){ex.r=r;ch++}if(ex.nt!==e.nt){ex.nt=e.nt;ch++}ex.docs=e.docs}
+else{S.au.push({cl:e.cl,k:e.k,a:e.a,b:e.b,r,x:'',nt:e.nt,m:e.m,by:'авто по отчётам',d:Date.now(),src:'auto',docs:e.docs});ch++}}
+S.au.forEach(x=>{if(x.src=='auto'&&!x.del&&!keep.has(key(x))){x.del=1;ch++}});
+AUR.n=E2.length;AUR.bad=E2.filter(e=>Math.abs(e.a-e.b)>=0.005).length;
+if(ch){logA('автоаудит по отчётам: проверок '+AUR.n+', расхождений '+AUR.bad);save()}
+if(!quiet||ch)toast(E2.length?'По принятым отчётам: проверок '+AUR.n+', расхождений '+AUR.bad:'Принятых отчётов для сверки пока нет')
+}catch(e){if(!quiet)toast('Не удалось прочитать отчёты: '+(e&&e.message||'ошибка'))}
+finally{AUR.busy=0;if(S&&S.view=='au')go()}}
 
 /* развитие: живые показатели и контроль рисков */
 V.rm=()=>{const T=vis(),C=CL(),cur=TD().slice(0,7),own=ME==null;
