@@ -451,7 +451,7 @@ if(!S||S.role!='admin')return;
 if(!ONL||!SYNC||!SYNC.tok){if(!quiet)toast('Сверка по отчётам работает при подключённой онлайн-базе');return}
 if(AUR.busy)return;AUR.busy=1;AUR.w=[];AUR.pend=[];
 try{
-const G={};
+const G={};let fc=0;
 for(const t of S.tasks){
 const ds=(S.docs||[]).filter(d=>d.tid==t.id&&d.k!='fix'&&xlsDoc(d)).sort((a,b)=>a.id-b.id);
 if(!ds.length)continue;
@@ -462,6 +462,7 @@ for(const d of ds){
 let rp;try{rp=await dParse(d.id)}catch(e){continue}
 if(!rp)continue;
 if(rp.form=='osv'){const a=nmKey(rp.org),b=nmKey(c.n);if(!a||!b||(a.indexOf(b)<0&&b.indexOf(a)<0)){AUR.w.push('Файл «'+d.n+'» — ОСВ другой организации ('+rp.org+'), к клиенту «'+c.n+'» не отнесён.');continue}}
+else if(!c.inn&&rp.inn){const o=S.clients.find(x=>x.id!=c.id&&x.inn==rp.inn);if(o){AUR.w.push('Файл «'+d.n+'»: ИНН '+rp.inn+' уже записан у клиента «'+o.n+'». Не взят в сверку.');continue}c.inn=rp.inn;fc++;logA('ИНН клиента «'+c.n+'» заполнен из принятого отчёта: '+rp.inn)}
 else if(c.inn&&rp.inn&&rp.inn!==c.inn){AUR.w.push('Файл «'+d.n+'» подан на ИНН '+rp.inn+', а у клиента «'+c.n+'» ИНН '+c.inn+'. В сверку не взят.');continue}
 const m=rp.from?rp.from.slice(0,7):'';if(!m)continue;
 ((G[c.id]=G[c.id]||{})[m]=G[c.id][m]||{})[rp.form]={rp,id:d.id}}}
@@ -480,6 +481,7 @@ for(const e of E2){keep.add(key(e));const r=Math.abs(e.a-e.b)<0.005?'ok':'bad',e
 if(ex){if(Math.abs(ex.a-e.a)>=0.005||Math.abs(ex.b-e.b)>=0.005){ex.a=e.a;ex.b=e.b;ex.r=r;delete ex.cm;ex.d=Date.now();ch++}else if((ex.r=='ok'||ex.r=='bad')&&ex.r!=r){ex.r=r;ch++}if(ex.nt!==e.nt){ex.nt=e.nt;ch++}ex.docs=e.docs}
 else{S.au.push({cl:e.cl,k:e.k,a:e.a,b:e.b,r,x:'',nt:e.nt,m:e.m,by:'авто по отчётам',d:Date.now(),src:'auto',docs:e.docs});ch++}}
 S.au.forEach(x=>{if(x.src=='auto'&&!x.del&&!keep.has(key(x))){x.del=1;ch++}});
+S.au.forEach((x,i)=>{if(x.src=='auto'&&(x.del||x.r=='ok')){const n=S.tasks.length;for(let k=S.tasks.length-1;k>=0;k--){const t=S.tasks[k];if(t.au===i&&t.st!='done'&&/^Вопрос аудита/.test(t.t))S.tasks.splice(k,1)}if(S.tasks.length!=n)ch++}});ch+=fc;
 AUR.n=E2.length;AUR.bad=E2.filter(e=>Math.abs(e.a-e.b)>=0.005).length;
 AUR.chgd=ch;if(ch){logA('автоаудит по отчётам: проверок '+AUR.n+', расхождений '+AUR.bad);save()}
 if(!quiet||ch)toast(E2.length?'По принятым отчётам: проверок '+AUR.n+', расхождений '+AUR.bad:'Принятых отчётов для сверки пока нет')
