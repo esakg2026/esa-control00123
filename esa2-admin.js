@@ -117,9 +117,12 @@
     au: 'Автоаудит: программа сама читает принятые Excel-отчёты (НДС, НсП, Форма 161, ОСВ, косвенные налоги, налог на прибыль) и сверяет суммы.',
     set: 'Настройки: профиль компании, бизнес-процессы, ставки, сферы и группы, тарифы, справочники.'
   };
+  const DOCSEC = { dash: 'dash', cl: 'clients', sm: 'smeta', tk: 'tasks', st: 'employees', au: 'autoaudit', qa: 'qa', lg: 'log', set: 'settings', me: 'me', ck: 'me', mc: 'me' };
+  const BOOK = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-4px"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2"/><path d="M8 7h7M8 11h5"/></svg>';
+  window.docOpen = function (sec) { const s = sec || DOCSEC[S && S.view] || 'start'; const w = window.open('docs.html#' + s, '_blank', 'noopener'); if (!w) location.href = 'docs.html#' + s; };
   window.hpOpen = function () {
     const v = S && S.view, t = HELP[v] || 'Выберите раздел слева. В каждом разделе есть подсказки и проверки ввода.';
-    modal(`<h3>Нужна помощь?</h3><p><b>${E(TITLE[v] || '')}</b><br>${E(t)}</p><p style="color:var(--mu);font-size:13px">Горячие клавиши: Esc — закрыть окно.</p><div class="row"><button class="b p" onclick="mx();sup()">✉ Написать в техподдержку</button><button class="b" onclick="mx()">Понятно</button></div>`);
+    modal(`<h3>Нужна помощь?</h3><p><b>${E(TITLE[v] || '')}</b><br>${E(t)}</p><p style="color:var(--mu);font-size:13px">Горячие клавиши: Esc — закрыть окно.</p><div class="row"><button class="b p" onclick="mx();docOpen()">${BOOK} Открыть справку</button><button class="b" onclick="mx();sup()">✉ Написать в техподдержку</button><button class="b" onclick="mx()">Понятно</button></div>`);
   };
   window.pmOpen = function () {
     const nm = ME != null ? en(ME) : (LG || CU || ''), role = ME != null ? ROLES[S.role] : 'Руководитель';
@@ -131,7 +134,7 @@
     try {
       const tb = $('#tb'); if (!tb || !S || document.getElementById('hp_b')) return;
       const last = tb.lastElementChild;
-      tb.insertAdjacentHTML('beforeend', `<button class="b" id="hp_b" onclick="hpOpen()" aria-label="Нужна помощь?" title="Нужна помощь?">?</button><button class="b" id="pm_b" onclick="pmOpen()" title="Профиль">${E(((ME != null ? en(ME) : LG || CU || '?') + '').trim().charAt(0).toUpperCase())}</button>`);
+      tb.insertAdjacentHTML('beforeend', `<button class="b" id="bk_b" onclick="docOpen()" aria-label="Справка" title="Справка по ESA Control">${BOOK}</button><button class="b" id="hp_b" onclick="hpOpen()" aria-label="Нужна помощь?" title="Нужна помощь?">?</button><button class="b" id="pm_b" onclick="pmOpen()" title="Профиль">${E(((ME != null ? en(ME) : LG || CU || '?') + '').trim().charAt(0).toUpperCase())}</button>`);
     } catch (e) { }
   };
 
